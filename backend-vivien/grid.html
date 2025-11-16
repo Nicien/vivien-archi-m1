@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ma Grille</title>
+    <style>
+        table { border-collapse: collapse; }
+        td {
+            width: 50px; height: 50px;
+            border: 1px solid black;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 24px;
+        }
+        .rock { background-color: gray; }
+        .player { background-color: lightblue; }
+    </style>
+</head>
+<body>
+    <h1>Ma Grille</h1>
+    <table id="grid"></table>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:22222';
+
+        async function fetchGrid() {
+            const res = await fetch(`${apiUrl}/grid`);
+            const grid = await res.json();
+            return grid;
+        }
+
+        function renderGrid(grid) {
+            const table = document.getElementById('grid');
+            table.innerHTML = '';
+            let row;
+            grid.cells.forEach((cell, idx) => {
+                if (idx % grid.width === 0) {
+                    row = table.insertRow();
+                }
+                const td = row.insertCell();
+                if (cell.is_rock) td.classList.add('rock');
+                if (cell.playerName) td.classList.add('player');
+                td.textContent = cell.playerName ? 'P' : '';
+            });
+        }
+
+        async function movePlayer(direction) {
+            const res = await fetch(`${apiUrl}/move`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ direction })
+            });
+            const data = await res.json();
+            if(data.grid) renderGrid(data.grid);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') movePlayer('right');
+            if (e.key === 'ArrowLeft') movePlayer('left');
+            if (e.key === 'ArrowUp') movePlayer('up');
+            if (e.key === 'ArrowDown') movePlayer('down');
+        });
+
+        // affichage initial
+        fetchGrid().then(renderGrid);
+    </script>
+</body>
+</html>
+
