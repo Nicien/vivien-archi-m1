@@ -29,7 +29,7 @@ grid = Grid(
 
 @app.get("/grid")
 async def read_grid() -> Grid:
-    return grid  # <-- IMPORTANT
+    return grid  
 
 @app.post("/cell/{cell_index}")
 async def update_cell(cell_index: int, body: dict = Body(...)):
