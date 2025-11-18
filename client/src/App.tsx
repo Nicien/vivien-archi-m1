@@ -3,16 +3,8 @@ import "./App.css";
 import type { components } from './backend-schema'
 
 type UpdateCellBody = components['schemas']['UpdateBody']
+type Grid = components['schemas']['Grid']
 
-type Cell = {
-  playerName?: string;
-};
-
-type Grid = {
-  width: number;
-  height: number;
-  cells: Cell[];
-};
 
 async function fetchGrid(setGrid: Dispatch<SetStateAction<Grid | null>>) {
   const result = await fetch("http://localhost:22222/grid");
@@ -71,7 +63,7 @@ function App() {
                 cursor: "pointer",
               }}
             >
-              {cell.playerName ?? ""}
+              {cell.caption ?? ""}
             </div>
           ))}
         </div>
