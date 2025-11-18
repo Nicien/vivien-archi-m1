@@ -2,11 +2,13 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import "./App.css";
 import type { components } from './backend-schema'
 
+
 type UpdateCellBody = components['schemas']['UpdateBody']
 type Grid = components['schemas']['Grid']
 
 
 async function fetchGrid(setGrid: Dispatch<SetStateAction<Grid | null>>) {
+
   const result = await fetch("http://localhost:22222/grid");
   const grid: Grid = await result.json();
   setGrid(grid);
@@ -35,6 +37,10 @@ function App() {
 
   useEffect(() => {
     fetchGrid(setGrid);
+
+    const interval = setInterval(()=>{
+        fetchGrid(setGrid);
+    },1000)
   }, []);
 
 console.log("grid:", grid);
