@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "generate": "openapi-typescript http://localhost:22222/openapi.json -o ./src/backend-schema.d.ts"
+    "generate": "openapi-typescript ../backend-vivien/openapi.yml -o ./src/backend-schema.d.ts"
   },
   "dependencies": {
     "react": "^19.1.1",
