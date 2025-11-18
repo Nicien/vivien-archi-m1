@@ -40,7 +40,7 @@ function App() {
 
     const interval = setInterval(()=>{
         fetchGrid(setGrid);
-    },1000)
+    },10)
   }, []);
 
 console.log("grid:", grid);
