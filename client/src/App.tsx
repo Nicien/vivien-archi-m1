@@ -37,17 +37,25 @@ function App() {
     fetchGrid(setGrid);
   }, []);
 
-  return (
-    <div className="container">
-      <h4>The Grid</h4>
+console.log("grid:", grid);
 
-      {grid && (
+  return (
+  <div className="container">
+    <h4>The Grid</h4>
+
+    {grid && (
+      <>
+        {/* Affichage clair du nombre de cases */}
+        <p className="case-count">
+          Nombre de cases : {grid.width * grid.height}
+        </p>
+
         <div
           className="world-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: `repeat(${grid.width}, 100px)`,
-            gridTemplateRows: `repeat(${grid.height}, 100px)`,
+            gridTemplateColumns: `repeat(${grid.width}, minmax(60px, 1fr))`,
+            gap: "8px",
           }}
         >
           {grid.cells.map((cell, cellIndex) => (
@@ -55,21 +63,16 @@ function App() {
               key={cellIndex}
               className="cell"
               onClick={() => updateCell(cellIndex, setGrid)}
-              style={{
-                border: "1px solid black",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
             >
               {cell.caption ?? ""}
             </div>
           ))}
         </div>
-      )}
-    </div>
-  );
+      </>
+    )}
+  </div>
+);
+
 }
 
 export default App;
