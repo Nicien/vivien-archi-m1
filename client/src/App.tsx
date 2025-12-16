@@ -1,18 +1,11 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import type { components } from "./backend-schema";
 
 type UpdateCellBody = components["schemas"]["UpdateBody"];
 type Grid = components["schemas"]["Grid"];
 
-async function fetchGrid(setGrid: Dispatch<SetStateAction<Grid | null>>) {
-  const result = await fetch("http://localhost:22222/grid");
-  const grid: Grid = await result.json();
-  setGrid(grid);
-}
-
 async function handleUpdateCell(
-  setGrid: Dispatch<SetStateAction<Grid | null>>,
   cellIndex: number,
   color: string
 ) {
@@ -27,8 +20,6 @@ async function handleUpdateCell(
     },
     body: JSON.stringify(body),
   });
-
-  await fetchGrid(setGrid);
 }
 
 function App() {
@@ -36,11 +27,28 @@ function App() {
   const [color, setColor] = useState("white");
 
   useEffect(() => {
-    fetchGrid(setGrid);
+    const ws = new WebSocket("ws://localhost:22222/ws");
 
-    const interval = setInterval(() => {
-      fetchGrid(setGrid);
-    }, 1000);
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    ws.onmessage = (event) => {
+      const gridData: Grid = JSON.parse(event.data);
+      setGrid(gridData);
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    return () => {
+      ws.close();
+    };
   }, []);
 
   console.log("grid:", grid);
@@ -69,7 +77,7 @@ function App() {
               <div
                 key={cellIndex}
                 className="cell"
-                onClick={() => handleUpdateCell(setGrid, cellIndex, color)}
+                onClick={() => handleUpdateCell(cellIndex, color)}
                 style={{
                   backgroundColor: cell.color ?? "transparent",
                 }}
