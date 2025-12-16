@@ -15,10 +15,7 @@ app.add_middleware(
 class CellContent:
     selected: bool
     caption: str | None = None
-<<<<<<< Updated upstream
-=======
     color: str  | None = None
->>>>>>> Stashed changes
 
 @dataclass
 class Grid:
@@ -42,19 +39,13 @@ async def read_grid() -> Grid:
 @dataclass
 class UpdateBody:
     caption: str
-<<<<<<< Updated upstream
-=======
     color : str
->>>>>>> Stashed changes
 
 @app.post("/cell/{cell_index}")
 async def update_cell(cell_index: int, body: UpdateBody):
     if 0 <= cell_index < len(grid.cells):
         grid.cells[cell_index].caption = body.caption
         grid.cells[cell_index].selected = True
-<<<<<<< Updated upstream
-=======
         grid.cells[cell_index].color = body.color
->>>>>>> Stashed changes
     return grid
 
