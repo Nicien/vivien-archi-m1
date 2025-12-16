@@ -5,6 +5,12 @@ import type { components } from "./backend-schema";
 type UpdateCellBody = components["schemas"]["UpdateBody"];
 type Grid = components["schemas"]["Grid"];
 
+async function resetGrid() {
+    await fetch("http://localhost:22222/reset", {
+        method: "POST",
+    });
+}
+
 async function handleUpdateCell(
   cellIndex: number,
   color: string
@@ -57,6 +63,12 @@ function App() {
     <div className="container">
       <h4>The Grid</h4>
       <input type="color" value="#ffffff" onChange={(e) => setColor(e.target.value)} />
+
+        <input
+            type="button"
+            value="Reset"
+            onClick={() => resetGrid()}
+        />
 
       {grid && (
         <>

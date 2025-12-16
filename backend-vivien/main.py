@@ -70,3 +70,13 @@ async def update_cell(cell_index: int, body: UpdateBody):
         await broadcast_grid()
         
     return grid
+
+@app.post("/reset")
+async def reset_grid():
+    for cell in grid.cells:
+        cell.caption = None
+        cell.color = None
+
+    await broadcast_grid()
+
+    return grid
