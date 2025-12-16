@@ -60,7 +60,8 @@ console.log("grid:", grid);
           className="world-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: `repeat(${grid.width}, minmax(60px, 1fr))`,
+            gridTemplateColumns: `repeat(${grid.width}, 50px)`,
+            gridTemplateRows: `repeat(${grid.height}, 50px)`,
           }}
         >
           {grid.cells.map((cell, cellIndex) => (
@@ -68,12 +69,6 @@ console.log("grid:", grid);
               key={cellIndex}
               className="cell"
               onClick={() => updateCell(cellIndex, setGrid)}
-              style={
-                {
-                  width: "50px",
-                  height: "50px"
-                }
-              }
             >
               {cell.caption ?? ""}
             </div>
