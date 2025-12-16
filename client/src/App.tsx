@@ -30,7 +30,7 @@ async function handleUpdateCell(
 
 function App() {
   const [grid, setGrid] = useState<Grid | null>(null);
-  const [color, setColor] = useState("white");
+  const [color, setColor] = useState("#00ffff");
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:22222/ws");
@@ -57,12 +57,10 @@ function App() {
     };
   }, []);
 
-  console.log("grid:", grid);
-
   return (
     <div className="container">
       <h4>The Grid</h4>
-      <input type="color" value="#ffffff" onChange={(e) => setColor(e.target.value)} />
+      <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
 
         <input
             type="button"
