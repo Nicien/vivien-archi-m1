@@ -61,7 +61,6 @@ console.log("grid:", grid);
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${grid.width}, minmax(60px, 1fr))`,
-            gap: "8px",
           }}
         >
           {grid.cells.map((cell, cellIndex) => (
