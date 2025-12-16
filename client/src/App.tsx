@@ -69,6 +69,12 @@ console.log("grid:", grid);
               key={cellIndex}
               className="cell"
               onClick={() => updateCell(cellIndex, setGrid)}
+              style={
+                {
+                  width: "50px",
+                  height: "50px"
+                }
+              }
             >
               {cell.caption ?? ""}
             </div>
