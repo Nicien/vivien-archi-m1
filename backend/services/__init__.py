@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from backend.repositories import Repositories
+from repositories import Repositories
 from .grid_service import GridService
 
 

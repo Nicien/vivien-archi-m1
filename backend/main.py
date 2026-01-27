@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from dataclasses import asdict  # Pour convertir la grille en JSON
 
-from backend.repositories import Repositories
-from backend.models import Grid
-from backend.services import Services
+from repositories import Repositories
+from models import Grid
+from services import Services
 
 
 repositories = Repositories()

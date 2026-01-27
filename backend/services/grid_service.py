@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 import random
 from uuid import uuid4
-from ..repositories import GridRepository
-from ..models import Grid, Player
+from repositories import GridRepository
+from models import Grid, Player
 
 PLAYER_COLORS = ["red", "blue", "green", "yellow", "purple", "orange"]
 
@@ -25,7 +25,7 @@ class GridService:
         grid = self.grid_repository.grid()
         # Place a new player at a random empty location in the grid
         empty_indices = [i for i, cell in enumerate(grid.cells) if cell.player is None]
-        if empty_indices:
+        if not empty_indices:
             raise ValueError("No empty space for a new player")
         player_position = random.choice(empty_indices)
         player = Player(id=str(uuid4()), color=random.choice(PLAYER_COLORS))
