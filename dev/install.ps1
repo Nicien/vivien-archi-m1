@@ -3,7 +3,7 @@
 $ErrorActionPreference = "Stop"
 
 # Installer les dépendances backend avec Poetry
-Push-Location ..\backend-vivien
+Push-Location ..\backend
 poetry install
 Pop-Location
 
@@ -13,8 +13,8 @@ npm install
 Pop-Location
 
 # Générer OpenAPI & TypeScript stubs
-Push-Location ..\backend-vivien
-poetry run python generate_openapi.py
+Push-Location ..\backend
+poetry run python -m backend.generate_openapi
 Pop-Location
 
 # Générer ../client/src/api/backend-schema.d.ts
