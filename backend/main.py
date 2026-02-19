@@ -60,6 +60,7 @@ async def read_grid() -> Grid:
 class UpdateBody:
     caption: str
     color : str
+    size: int
 
 @app.post("/cell/{cell_index}")
 async def update_cell(cell_index: int, body: UpdateBody):
