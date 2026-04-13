@@ -1,42 +1,279 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* =========================================================
+   CYBER GRID — App styles
+   ========================================================= */
+
+/* ---- Layout -------------------------------------------- */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 16px 32px;
+  width: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* ---- Title --------------------------------------------- */
+
+.title {
+  font-size: 18px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  text-shadow:
+    0 0 6px  var(--cyan),
+    0 0 20px var(--cyan),
+    0 0 40px var(--cyan);
+  animation: glitch 4s infinite;
+  position: relative;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.title::before,
+.title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.title::before {
+  color: var(--magenta);
+  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+  animation: glitch-before 4s infinite;
+  text-shadow: 2px 0 var(--magenta);
 }
 
-.card {
-  padding: 2em;
+.title::after {
+  color: var(--yellow);
+  clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+  animation: glitch-after 4s infinite;
+  text-shadow: -2px 0 var(--yellow);
 }
 
-.read-the-docs {
-  color: #888;
+@keyframes glitch {
+  0%, 90%, 100% { transform: none; }
+  92%            { transform: skewX(-2deg) translateX(2px); }
+  94%            { transform: skewX( 2deg) translateX(-2px); }
+  96%            { transform: none; }
+}
+
+@keyframes glitch-before {
+  0%, 90%, 100% { transform: none; opacity: 0; }
+  92%            { transform: translateX(-3px); opacity: 0.8; }
+  94%            { transform: translateX( 3px); opacity: 0.8; }
+  96%            { opacity: 0; }
+}
+
+@keyframes glitch-after {
+  0%, 90%, 100% { transform: none; opacity: 0; }
+  93%            { transform: translateX( 3px); opacity: 0.7; }
+  95%            { transform: translateX(-3px); opacity: 0.7; }
+  96%            { opacity: 0; }
+}
+
+/* ---- HUD bar ------------------------------------------- */
+
+.hud-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 12px rgba(0,255,255,0.08), inset 0 0 20px rgba(0,0,0,0.5);
+  padding: 12px 20px;
+  position: relative;
+}
+
+.hud-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--bg2), var(--bg2)) padding-box,
+    linear-gradient(90deg, var(--cyan), var(--magenta)) border-box;
+  pointer-events: none;
+}
+
+/* ---- Color picker ------------------------------------- */
+
+.color-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-label {
+  font-size: 7px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.color-picker {
+  width: 48px;
+  height: 32px;
+  border: 2px solid var(--cyan);
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  box-shadow: 0 0 8px var(--cyan), inset 0 0 4px rgba(0,255,255,0.2);
+  transition: box-shadow 0.2s;
+}
+
+.color-picker:hover {
+  box-shadow: 0 0 16px var(--cyan), 0 0 32px var(--cyan);
+}
+
+/* ---- Reset button -------------------------------------- */
+
+.btn-reset {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--magenta);
+  background: transparent;
+  border: 2px solid var(--magenta);
+  padding: 10px 16px;
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--magenta), inset 0 0 8px rgba(255,0,255,0.05);
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-reset::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--magenta);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.btn-reset:hover {
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--magenta), 0 0 40px var(--magenta);
+}
+
+.btn-reset:hover::after {
+  opacity: 1;
+}
+
+.btn-reset:hover span {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-reset:active {
+  transform: scale(0.95);
+}
+
+/* ---- Player counter ------------------------------------ */
+
+.player-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.player-count .count {
+  font-size: 14px;
+  color: var(--yellow);
+  text-shadow: 0 0 8px var(--yellow), 0 0 20px var(--yellow);
+}
+
+/* ---- Cell count ---------------------------------------- */
+
+.case-count {
+  font-size: 7px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+/* ---- Grid ---------------------------------------------- */
+
+.world-grid {
+  display: grid;
+  gap: 1px;
+  padding: 2px;
+  background: var(--border);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 0 30px rgba(0,255,255,0.10),
+    0 0 60px rgba(0,255,255,0.05);
+}
+
+.cell {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  transition: filter 0.08s, transform 0.08s;
+  position: relative;
+  font-size: 7px;
+  border: 1px solid rgba(0, 255, 255, 0.06);
+}
+
+.cell:hover {
+  filter: brightness(1.4);
+  transform: scale(1.06);
+  z-index: 1;
+  border-color: rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0,255,255,0.4);
+}
+
+.cell.clicked {
+  animation: cell-flash 0.25s ease-out;
+}
+
+@keyframes cell-flash {
+  0%   { filter: brightness(3) saturate(3); transform: scale(1.15); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+
+/* ---- Player marker on cell ----------------------------- */
+
+.player-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: 0 0 6px currentColor;
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+}
+
+/* ---- Status bar ---------------------------------------- */
+
+.status-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 7px;
+  color: var(--dim);
+  letter-spacing: 1px;
+  padding: 0 4px;
+  max-width: 520px;
+}
+
+.status-online {
+  color: #00ff88;
+  text-shadow: 0 0 6px #00ff88;
+}
+
+.status-offline {
+  color: #ff4444;
+  text-shadow: 0 0 6px #ff4444;
 }
