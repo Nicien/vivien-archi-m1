@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "22222:22222"
+    restart: always
+
+  frontend:
+    build: ./client
+    ports:
+      - "80:80"
+    restart: always
