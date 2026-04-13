@@ -19,7 +19,6 @@ function App() {
   // API Calls
   const resetGrid = () => fetch("http://localhost:22222/reset", { method: "POST" });
   const startBadApple = () => fetch("http://localhost:22222/play-bad-apple", { method: "POST" });
-  const stopBadApple = () => fetch("http://localhost:22222/stop-bad-apple", { method: "POST" });
 
   const handleUpdateCell = async (cellIndex: number, cellColor: string) => {
     const body: UpdateCellBody = { caption: "", color: cellColor };
@@ -50,7 +49,7 @@ function App() {
         </button>
 
         <button
-          onClick={stopBadApple}
+          onClick={resetGrid}
           style={{ marginLeft: "5px", background: "#e74c3c", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
         >
           🛑 OFF

@@ -149,7 +149,3 @@ async def reset_grid():
     
     await broadcast_grid()
     return grid
-
-@app.post("/stop-bad-apple")
-async def stop_bad_apple():
-    return await reset_grid()
