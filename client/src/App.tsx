@@ -1,105 +1,50 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-import type { components } from "./backend-schema";
+// client/src/App.jsx
+import { useEffect, useState, type Dispatch, SetStateAction } from 'react'
+import './App.css'
 
-type UpdateCellBody = components["schemas"]["UpdateBody"];
-type Grid = components["schemas"]["Grid"];
 
-async function resetGrid() {
-    await fetch("http://localhost:22222/reset", {
-        method: "POST",
-    });
+type Cell = {
+    playerName?: string
 }
 
-async function handleUpdateCell(
-  cellIndex: number,
-  color: string
-) {
-  const body: UpdateCellBody = {
-    caption: "",
-    color: color,
-  };
-  await fetch(`http://localhost:22222/cell/${cellIndex}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+type Grid = {
+    width: number
+    height: number
+    cells: Cell[]
+}
+
+async function fetchGrid(setGrid: Dispatch<SetStateAction<Grid | null>>) {
+    const result = await fetch('http://localhost:22222/grid')
+    const grid : Grid = await result.json()
+    setGrid(grid)
 }
 
 function App() {
-  const [grid, setGrid] = useState<Grid | null>(null);
-  const [color, setColor] = useState("#00ffff");
+    const [grid, setGrid] = useState<Grid | null>(null)
 
-  useEffect(() => {
-    const ws = new WebSocket("ws://localhost:22222/ws");
+    useEffect(() => {
+        fetchGrid(setGrid)
+    }, [])
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-    };
-
-    ws.onmessage = (event) => {
-      const gridData: Grid = JSON.parse(event.data);
-      setGrid(gridData);
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, []);
-
-  return (
-    <div className="container">
-      <h4>The Grid</h4>
-      <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
-
-        <input
-            type="button"
-            value="Reset"
-            onClick={() => resetGrid()}
-        />
-
-      {grid && (
-        <>
-          {/* Affichage clair du nombre de cases */}
-          <p className="case-count">
-            Nombre de cases : {grid.width * grid.height}
-          </p>
-
-          <div
-            className="world-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${grid.width}, 50px)`,
-              gridTemplateRows: `repeat(${grid.height}, 50px)`,
-            }}
-          >
-            {grid.cells.map((cell, cellIndex) => (
-              <div
-                key={cellIndex}
-                className="cell"
-                onClick={() => handleUpdateCell(cellIndex, color)}
-                style={{
-                  backgroundColor: cell.color ?? "transparent",
-                }}
-              >
-                {cell.caption ?? ""}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
+    return (
+        <div className="container">
+            <h4>The Grid</h4>
+            {
+                grid && <div className="world-grid" style={{
+                    gridTemplateColumns: `repeat(${grid.width}, 100px)`,
+                    gridTemplateRows: `repeat(${grid.height}, 100px)`
+                }}>
+                    {
+                        grid.cells.map((cell, cellIndex)=>(
+                            <div key={cellIndex}>
+                                { cell.playerName }
+                            </div>
+                        ))
+                    }
+                </div>
+            }
+        </div>
+    )
 }
 
-export default App;
+export default App
