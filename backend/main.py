@@ -56,12 +56,15 @@ async def websocket_endpoint(websocket: WebSocket):
 async def broadcast_grid():
     grid = repositories.grid_repository.grid()
     grid_dict = asdict(grid)
-    for client in list(active_clients):
+    
+    async def send_to_client(client):
         try:
             await client.send_json(grid_dict)
         except:
             if client in active_clients:
                 active_clients.remove(client)
+    
+    await asyncio.gather(*[send_to_client(client) for client in list(active_clients)], return_exceptions=True)
 
 
 
