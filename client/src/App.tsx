@@ -5,94 +5,99 @@ import type { components } from "./backend-schema";
 type UpdateCellBody = components["schemas"]["UpdateBody"];
 type Grid = components["schemas"]["Grid"];
 
-async function resetGrid() {
-    await fetch("http://localhost:22222/reset", {
-        method: "POST",
-    });
-}
-
-async function handleUpdateCell(
-  cellIndex: number,
-  color: string
-) {
-  const body: UpdateCellBody = {
-    caption: "",
-    color: color,
-  };
-  await fetch(`http://localhost:22222/cell/${cellIndex}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-}
-
 function App() {
   const [grid, setGrid] = useState<Grid | null>(null);
-  const [color, setColor] = useState("#00ffff");
+  const [color, setColor] = useState("#b2e27b");
 
+  // Connexion WebSocket
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:22222/ws");
-
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-    };
-
-    ws.onmessage = (event) => {
-      const gridData: Grid = JSON.parse(event.data);
-      setGrid(gridData);
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    return () => {
-      ws.close();
-    };
+    ws.onmessage = (event) => setGrid(JSON.parse(event.data));
+    return () => ws.close();
   }, []);
+
+  // API Calls
+  const resetGrid = () => fetch("http://localhost:22222/reset", { method: "POST" });
+  const startBadApple = () => fetch("http://localhost:22222/play-bad-apple", { method: "POST" });
+  const stopBadApple = () => fetch("http://localhost:22222/stop-bad-apple", { method: "POST" });
+
+  const handleUpdateCell = async (cellIndex: number, cellColor: string) => {
+    const body: UpdateCellBody = { caption: "", color: cellColor };
+    await fetch(`http://localhost:22222/cell/${cellIndex}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  };
+
+  // Adaptation dynamique de la taille des cases
+  const isVideoMode = grid && grid.width > 20;
+  const cellSize = isVideoMode ? "15px" : "50px";
 
   return (
     <div className="container">
-      <h4>The Grid</h4>
-      <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+      <h4>The Grid - Bad Apple Edition</h4>
 
-        <input
-            type="button"
-            value="Reset"
-            onClick={() => resetGrid()}
-        />
+      <div className="controls" style={{ marginBottom: "20px" }}>
+        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+        <button onClick={resetGrid}>Reset</button>
+
+        <button
+          onClick={startBadApple}
+          style={{ marginLeft: "10px", background: "#2ecc71", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
+        >
+          ▶ PLAY
+        </button>
+
+        <button
+          onClick={stopBadApple}
+          style={{ marginLeft: "5px", background: "#e74c3c", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
+        >
+          🛑 OFF
+        </button>
+      </div>
 
       {grid && (
         <>
-          {/* Affichage clair du nombre de cases */}
-          <p className="case-count">
-            Nombre de cases : {grid.width * grid.height}
-          </p>
-
+          <p>Taille de la grille : {grid.width}x{grid.height}</p>
           <div
             className="world-grid"
             style={{
               display: "grid",
-              gridTemplateColumns: `repeat(${grid.width}, 50px)`,
-              gridTemplateRows: `repeat(${grid.height}, 50px)`,
+              gridTemplateColumns: `repeat(${grid.width}, ${cellSize})`,
+              gap: "0px",
+              background: "#ffffff",
+              padding: "8px",
+              borderRadius: "8px",
+              margin: "0 auto",
+              width: "fit-content",
+              boxSizing: "border-box"
             }}
           >
-            {grid.cells.map((cell, cellIndex) => (
+            {grid.cells.map((cell, idx) => (
               <div
-                key={cellIndex}
+                key={idx}
                 className="cell"
-                onClick={() => handleUpdateCell(cellIndex, color)}
+                onClick={() => handleUpdateCell(idx, color)}
                 style={{
+                  width: cellSize,
+                  height: cellSize,
+                  minWidth: cellSize,
+                  minHeight: cellSize,
+                  maxWidth: cellSize,
+                  maxHeight: cellSize,
                   backgroundColor: cell.color ?? "transparent",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "10px",
+                  boxSizing: "border-box",
+                  border: "0.1px solid #222",
+                  padding: "0"
                 }}
               >
-                {cell.caption ?? ""}
+                {!isVideoMode && cell.caption}
               </div>
             ))}
           </div>
