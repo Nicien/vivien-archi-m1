@@ -1,13 +1,194 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ort/place</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu du Labyrinthe</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f4f4f9; margin: 0; padding: 20px;}
+        
+        /* BANDEAU GÉANT POUR LES INFOS */
+        .hud {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            display: inline-flex;
+            gap: 40px;
+            align-items: center;
+            font-size: 26px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .timer-box { font-size: 34px; font-weight: bold; color: #f1c40f; }
+        .timer-danger { color: #e74c3c; animation: clignote 1s infinite; }
+        @keyframes clignote { 50% { opacity: 0; } }
+
+        /* LA GRILLE */
+        table { border-collapse: collapse; margin: 0 auto; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        td {
+            width: 70px; height: 70px;
+            border: 2px solid #bdc3c7;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 35px;
+        }
+        
+        /* LES CASES SPÉCIALES */
+        .rock { background-color: #7f8c8d; border-color: #34495e; }
+        .exit { background-color: #2ecc71; border-color: #27ae60; } /* Case FIN bien verte */
+        .player-a { background-color: #3498db; }
+        .player-b { background-color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <h1>🌟 Fuis le Labyrinthe !</h1>
+    
+    <div class="hud">
+        <div>Niveau <strong id="niveau">1</strong></div>
+        <div class="timer-box" id="timer-box">⏱️ <span id="timer">60</span>s</div>
+        <div>💥 Collisions : <strong id="compteur">0</strong></div>
+    </div>
+
+    <table id="grid"></table>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:22222';
+        
+        // C'est ici que tu choisis si tu contrôles le Joueur A ou B
+        const myPlayerName = "Player A"; 
+        
+        let timeLeft = 60;
+        let timerInterval = null;
+        let currentLevel = 1;
+        let isPlaying = true;
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            const timerBox = document.getElementById('timer-box');
+            timerBox.classList.remove('timer-danger');
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 10) {
+                    timerBox.classList.add('timer-danger');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isPlaying = false;
+                    alert("⏱️ TEMPS ÉCOULÉ ! Vous avez perdu. On recommence tout !");
+                    resetGame(1);
+                }
+            }, 1000);
+        }
+
+        async function resetGame(level) {
+            const res = await fetch(`${apiUrl}/reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ level: level })
+            });
+            const data = await res.json();
+            currentLevel = data.grid.level;
+            document.getElementById('niveau').textContent = currentLevel;
+            renderGrid(data.grid);
+            isPlaying = true;
+            startTimer();
+        }
+
+        async function fetchGrid() {
+            try {
+                const res = await fetch(`${apiUrl}/grid`);
+                const gridData = await res.json();
+                
+                if (gridData.level !== currentLevel) {
+                    currentLevel = gridData.level;
+                    document.getElementById('niveau').textContent = currentLevel;
+                    startTimer();
+                }
+                renderGrid(gridData);
+            } catch (err) {
+                console.error("Erreur serveur", err);
+            }
+        }
+
+        function renderGrid(grid) {
+            if (grid.collisions !== undefined) {
+                document.getElementById('compteur').textContent = grid.collisions;
+            }
+
+            const table = document.getElementById('grid');
+            table.innerHTML = '';
+            let row;
+            grid.cells.forEach((cell, idx) => {
+                if (idx % grid.width === 0) row = table.insertRow();
+                
+                const td = row.insertCell();
+                
+                if (cell.is_rock) td.classList.add('rock');
+                
+                if (cell.is_exit) {
+                    td.classList.add('exit');
+                    td.textContent = "🏁"; // Drapeau de fin
+                }
+                
+                if (cell.playerName) {
+                    if (cell.playerName === "Player A") {
+                        td.classList.add('player-a');
+                        td.textContent = "🟦"; // Joueur A
+                    } else if (cell.playerName === "Player B") {
+                        td.classList.add('player-b');
+                        td.textContent = "🟥"; // Joueur B
+                    }
+                }
+            });
+        }
+
+        async function movePlayer(direction) {
+            if (!isPlaying) return;
+
+            try {
+                const res = await fetch(`${apiUrl}/move`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ direction: direction, playerName: myPlayerName })
+                });
+                const data = await res.json();
+                
+                if (data.grid) renderGrid(data.grid);
+
+                if (data.status === "win") {
+                    isPlaying = false;
+                    clearInterval(timerInterval);
+                    setTimeout(() => {
+                        alert(`🏆 GAGNÉ ! Passage au niveau suivant.`);
+                        resetGame(currentLevel + 1);
+                    }, 100);
+                }
+
+            } catch (err) {
+                console.error("Erreur de mouvement", err);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(e.key)) {
+                e.preventDefault(); // Empêche la page de scroller quand on joue
+            }
+            if (e.key === 'ArrowRight') movePlayer('right');
+            if (e.key === 'ArrowLeft') movePlayer('left');
+            if (e.key === 'ArrowUp') movePlayer('up');
+            if (e.key === 'ArrowDown') movePlayer('down');
+        });
+
+        // Polling multijoueur (actualise très vite pour voir le joueur B bouger)
+        setInterval(fetchGrid, 200);
+
+        resetGame(1);
+    </script>
+</body>
 </html>
