@@ -1,17 +1,45 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import type { components } from "./backend-schema";
 
 type UpdateCellBody = components["schemas"]["UpdateBody"];
 type Grid = components["schemas"]["Grid"];
 
+const getApiUrl = () => {
+  if (import.meta.env) {
+    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  }
+
+  if (window.location.hostname !== "localhost") {
+    return `${window.location.protocol}//${window.location.hostname}:22222`;
+  }
+
+  return "http://localhost:22222";
+};
+
+const getWsUrl = () => {
+  if (import.meta.env) {
+    if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+  }
+
+  if (window.location.hostname !== "localhost") {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.hostname}:22222/ws`;
+  }
+
+  return "ws://localhost:22222/ws";
+};
+
+const API_URL = getApiUrl();
+const WS_URL = getWsUrl();
+
 async function resetGrid() {
-  await fetch("http://localhost:22222/reset", { method: "POST" });
+  await fetch(`${API_URL}/reset`, { method: "POST" });
 }
 
 async function handleUpdateCell(cellIndex: number, color: string) {
   const body: UpdateCellBody = { caption: "", color, size: 1 };
-  await fetch(`http://localhost:22222/cell/${cellIndex}`, {
+  await fetch(`${API_URL}/cell/${cellIndex}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -34,7 +62,7 @@ function App() {
     let retryTimer: ReturnType<typeof setTimeout>;
 
     function connect() {
-      ws = new WebSocket("ws://localhost:22222/ws");
+      ws = new WebSocket(WS_URL);
 
       ws.onopen = () => setOnline(true);
 
@@ -43,8 +71,8 @@ function App() {
         setGrid(gridData);
       };
 
-      ws.onerror  = () => setOnline(false);
-      ws.onclose  = () => {
+      ws.onerror = () => setOnline(false);
+      ws.onclose = () => {
         setOnline(false);
         retryTimer = setTimeout(connect, 2000);
       };
